@@ -5,6 +5,9 @@ hero:
   name: RxJS Knowledge Base
   text: My reactive programming knowledge, in one place
   tagline: Built incrementally, session by session — everything here aims to be executable, every claim backed by a spec.
+  image:
+    src: /rx-logo.png
+    alt: RxJS logo
   actions:
     - theme: brand
       text: Start with Observables

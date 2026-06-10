@@ -25,6 +25,11 @@
     #d81b60 30%,
     #d97757
   );
+
+  /* Hero image: Claude starburst sits fully behind the RxJS logo,
+     only its orange rays showing around the edge */
+  --vp-home-hero-image-background-image: url('/netxpert-site/claude-rays.svg');
+  --vp-home-hero-image-filter: none;
 }
 
 .dark {
@@ -62,11 +67,75 @@
 }
 
 /* Feature cards on the home page get a subtle orange edge on hover */
-.VPFeature:hover {
+.VPFeature:hover,
+.VPFeature.link:hover {
   border-color: var(--nx-accent-1);
 }
 
 /* Blockquotes lean orange — used for asides and commentary */
 .vp-doc blockquote {
   border-left-color: var(--nx-accent-1);
+}
+
+/* ---- Hero logo: RxJS in front, Claude rays behind ------------------- */
+
+/* The starburst layer fills the image slot; the logo covers its center
+   so only the ray tips show around the edge */
+.VPHero .image-bg {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 0;
+}
+/* Logo sized to ~72% of the starburst (192/256/320px at VitePress's
+   breakpoints) with an opaque page-colored disc behind it, so only the
+   ray tips show around the edge */
+.VPHero .image-src {
+  max-width: none;
+  max-height: none;
+  width: 138px;
+  border-radius: 50%;
+  background: var(--vp-c-bg);
+}
+@media (min-width: 640px) {
+  .VPHero .image-src {
+    width: 184px;
+  }
+}
+@media (min-width: 960px) {
+  .VPHero .image-src {
+    width: 230px;
+  }
+}
+
+/* On hover, the RxJS logo steps aside for a moment so Claude appears,
+   then everything settles back into place */
+.VPHero .image-container:hover .image-bg {
+  animation: claude-peek-rays 1.6s ease-in-out;
+}
+.VPHero .image-container:hover .image-src {
+  animation: claude-peek-logo 1.6s ease-in-out;
+}
+
+@keyframes claude-peek-rays {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.22) rotate(14deg);
+  }
+}
+
+@keyframes claude-peek-logo {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  35%,
+  55% {
+    opacity: 0.1;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
 }
