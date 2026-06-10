@@ -19,4 +19,3 @@ There is no lint setup; `tsc` (via `npm run build`) is the only check.
 
 - `tsconfig.json` uses `noEmit`, bundler module resolution, `verbatimModuleSyntax`, and `erasableSyntaxOnly` — avoid TS-only runtime syntax like enums and parameter properties; type-only imports must use `import type`.
 - `rxjs` and `vitepress` are declared as dependencies but are not used anywhere yet.
-- This directory is not a git repository.
