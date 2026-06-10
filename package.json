@@ -4,9 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "play": "vite",
+    "play:build": "tsc && vite build",
+    "test": "vitest"
   },
   "devDependencies": {
     "typescript": "~6.0.2",
