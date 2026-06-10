@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 An RxJS knowledge base built incrementally across sessions (see STRUCTURE-PROPOSAL.md for the full vision). Three pillars:
 
-- `docs/` — VitePress site, the main product. Twelve sections, one per major RxJS component: observables, operators, observers, subscriptions, subjects, schedulers, custom-operators, typescript, patterns, tools, testing, debugging. Each new topic becomes a markdown page in its section; the sidebar lives in `docs/.vitepress/config.ts`.
+- `docs/` — VitePress site, the main product. Design tokens live in `docs/.vitepress/theme/custom.css`: RxJS magenta (`--vp-c-brand-*`) is the brand color; Claude orange (`--nx-accent-*`) is a sparing accent (hero gradient, hovers, tip blocks) — keep new styling within that scheme. Twelve sections, one per major RxJS component: observables, operators, observers, subscriptions, subjects, schedulers, custom-operators, typescript, patterns, tools, testing, debugging. Each new topic becomes a markdown page in its section; the sidebar lives in `docs/.vitepress/config.ts`.
 - `specs/` — Vitest marble specs (`TestScheduler`) mirroring the docs structure; every concept page should have a spec that proves its claims.
 - `src/` — vanilla TS + Vite playground app for interactive browser demos (still the starter counter template).
 
