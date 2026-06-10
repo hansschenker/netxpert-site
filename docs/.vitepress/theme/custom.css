@@ -111,10 +111,10 @@
 /* On hover, the RxJS logo steps aside for a moment so Claude appears,
    then everything settles back into place */
 .VPHero .image-container:hover .image-bg {
-  animation: claude-peek-rays 1.6s ease-in-out;
+  animation: claude-peek-rays 2.6s ease-in-out;
 }
 .VPHero .image-container:hover .image-src {
-  animation: claude-peek-logo 1.6s ease-in-out;
+  animation: claude-peek-logo 2.6s ease-in-out;
 }
 
 @keyframes claude-peek-rays {
