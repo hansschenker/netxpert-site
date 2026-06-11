@@ -1,6 +1,6 @@
 // Proves the claims made in docs/observables/what-is-an-observable.md
 import { describe, expect, it } from 'vitest'
-import { Observable, of, range, debounceTime, filter, map, mergeMap, share, shareReplay } from 'rxjs'
+import { Observable, fromEvent, of, range, debounceTime, filter, map, mergeMap, share, shareReplay } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 
 const scheduler = () =>
@@ -115,6 +115,38 @@ describe('temperature: cold vs hot', () => {
     shared$.subscribe()
 
     expect(executions).toBe(1)
+  })
+
+  it('share() resets on complete: a subscriber arriving after completion starts a fresh execution', () => {
+    let executions = 0
+    const cold$ = new Observable<number>(subscriber => {
+      executions++
+      subscriber.next(executions)
+      subscriber.complete()
+    })
+
+    const shared$ = cold$.pipe(share())
+    shared$.subscribe() // runs and completes synchronously — the shared connection resets
+    shared$.subscribe() // arrives "late", so this is a fresh execution (a fresh network call)
+
+    expect(executions).toBe(2)
+  })
+
+  it('fromEvent is a cold wrapper around a hot source: each subscriber attaches its own listener', () => {
+    let listeners = 0
+    const target = {
+      addEventListener: () => { listeners++ },
+      removeEventListener: () => { listeners-- },
+    }
+
+    const clicks$ = fromEvent(target, 'click')
+    const a = clicks$.subscribe()
+    const b = clicks$.subscribe()
+    expect(listeners).toBe(2) // per-subscriber execution — cold mechanics
+
+    a.unsubscribe()
+    b.unsubscribe()
+    expect(listeners).toBe(0) // cleanup detaches each listener
   })
 
   it('shareReplay(1) shares one execution and replays the last value to late subscribers', () => {

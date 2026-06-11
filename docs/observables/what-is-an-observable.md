@@ -198,11 +198,15 @@ Temperature answers one question: **when does the producer start, relative to su
 - A **cold** Observable starts its producer *on subscribe*. Each subscriber gets its own fresh, independent execution — like calling a function, or ordering a coffee: the barista starts when you order, and the coffee is yours. HTTP requests, `interval`, timers, and async computations are cold.
 - A **hot** Observable has a producer that is *already running*, independent of any subscriber — like a radio broadcast or live TV: tune in late and you missed what you missed. Mouse events, WebSocket messages, and Subjects are hot.
 
+::: info Strictly speaking: `fromEvent` is a cold wrapper around a hot source
+Each `fromEvent` subscription attaches its *own* listener — per-subscriber execution, which is cold mechanics. What is hot is the *event source*: the mouse moves whether or not anyone subscribes, and values are never replayed. The property that matters in practice — tune in late and you missed what you missed — holds either way.
+:::
+
 Temperature is not a property of the data; it is a property of when the producer starts. And it determines three operational things: whether values are replayed for late subscribers, whether subscribers share one execution, and whether timing affects correctness.
 
 ### The classic bug
 
-You wrap an HTTP request in a cold Observable and subscribe to it in three places — and you've just made three network calls. This is one of the most common bugs in RxJS. The fix is usually `share()` or `shareReplay(1)`, which **multicast** the execution — converting the cold Observable into a hot one so all subscribers share a single run (`shareReplay` additionally replays the last *n* values to late subscribers). But you have to know the temperature distinction exists before you can even diagnose the problem.
+You wrap an HTTP request in a cold Observable and subscribe to it in three places — and you've just made three network calls. This is one of the most common bugs in RxJS. The fix is to **multicast** the execution. `share()` lets all *concurrent* subscribers share a single run — but by default it resets when the source completes, so a subscriber arriving after completion starts a fresh execution (for an HTTP request: a fresh network call). When subscribers can arrive late, `shareReplay(1)` is the robust fix: it shares one execution *and* replays the latest value to late subscribers. But you have to know the temperature distinction exists before you can even diagnose the problem.
 
 ## The pattern fusion: Iterator + Observer
 
