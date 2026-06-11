@@ -15,7 +15,7 @@ The intellectual heritage goes back decades before JavaScript had Promises:
 1. **Haskell (1990s)** gave us monads and lazy sequences — the idea that you can *describe* a computation without executing it.
 2. **LINQ (2007)** took that idea and built a unified query model: query a database, an in-memory list, or an XML document with the exact same operators, regardless of the underlying source.
 3. **Rx.NET (2009–2012)** — Erik Meijer, a Haskell person before joining Microsoft, asked: *if `IEnumerable<T>` models synchronous pull-based sequences, what is its mathematical dual?* The answer is `IObservable<T>`. Rx.NET applied the entire LINQ operator algebra to asynchronous events.
-4. **RxJS (~2012–2013)** is the JavaScript port of that design. Angular adopting it as a core dependency drove massive adoption — but the core model is essentially unchanged from Rx.NET in 2009. That stability is the sign of a genuinely good abstraction.
+4. **RxJS (early 2010s)** is the JavaScript port of that design — Microsoft's original Rx for JavaScript appeared around 2010, and the library was rewritten from the ground up as RxJS 5 in 2015–2016. Angular adopting it as a core dependency drove massive adoption — but the core model is essentially unchanged from Rx.NET in 2009. That stability is the sign of a genuinely good abstraction.
 
 ### Duality: flip the arrows
 
@@ -36,7 +36,7 @@ Every operation maps one-to-one across the duality, which is why the design feel
 | `Select`     | `map`       |
 | `Where`      | `filter`    |
 | `SelectMany` | `mergeMap`  |
-| `Aggregate`  | `scan`      |
+| `Aggregate`  | `reduce` (running variant: `scan`) |
 
 This is why "RxJS is asynchronous LINQ" (or "Lodash for async") is not just a cute analogy — it is architecturally accurate. The operators are the same algebra, applied to a push-based sequence instead of a pull-based one. And it is why async naturally needs push: the network doesn't care about your `for` loop. You can't block and wait — the producer must control timing, and you react when something arrives.
 
@@ -57,6 +57,22 @@ Two analogies that hold up:
 
 Because it makes no assumption about storage, an Observable can represent things that have no collection underneath them at all: mouse moves, WebSocket messages, a heartbeat sensor, a timer, network streams, custom producer logic. **Observable is the universal adapter for data in motion.** Arrays are data at rest; Observables are data in motion.
 
+### The behavior, formally
+
+"Behavior" is not just a metaphor — it has a precise reading, built up in three steps:
+
+```
+T → a                          a behavior: the value as a function of time
+{t, a}                         one occurrence: a value stamped with its time
+[{t₀, a₀}, {t₁, a₁}, …]        an Observable: a sequence of occurrences
+```
+
+1. **`T → a`** — a time-varying value is a *function from time*. Ask "what is the value at time t?" and you get an answer. This is the purest sense in which behavior implies time: the value doesn't exist apart from the moment you observe it.
+2. **`{t, a}`** — observation discretizes that function into an *occurrence*: a pair of a timestamp and the value at that timestamp.
+3. **`[{t₀, a₀}, {t₁, a₁}, …]`** — an Observable is the *sequence of occurrences*: each `next` notification is one pair, in time order, potentially forever.
+
+So an array is `[a₀, a₁, …]` — values with no time axis — while an Observable is `[{t₀, a₀}, {t₁, a₁}, …]` — the same values, but with time as part of the data. That extra dimension is the whole difference, and it is what the [time–value model](#the-time-value-model) below builds on.
+
 ## Interfaces as protocols
 
 `IEnumerable<T>` and `IObservable<T>` are interfaces, and an interface is more than "a shape of methods" — it is a **protocol**: the signatures tell you what messages you can send, and the semantics tell you in what order and with what guarantees.
@@ -66,9 +82,9 @@ Because it makes no assumption about storage, an Observable can represent things
 
 The interface is the contract; the implementation is free to do anything as long as it respects that contract. Both protocols answer the same question — *how do I talk to a sequence of `T`?* — one pull-based, one push-based.
 
-## The time–value model
+## The time-value model
 
-Formally, an Observable is a sequence of **pairs**: a timestamp and a value — `(t₀, a₀), (t₁, a₁), …` — potentially forever. Time is a first-class dimension of the data, not an accident of execution.
+As [the formalization above](#the-behavior-formally) showed, an Observable is a sequence of timestamped pairs `[{t₀, a₀}, {t₁, a₁}, …]` — time is a first-class dimension of the data, not an accident of execution.
 
 This explains the operator catalog. Operators split into three classes:
 
@@ -181,7 +197,7 @@ RxJS ships three points in the design space:
 | Variant                  | Temperature | Cast      | Notes |
 | ------------------------ | ----------- | --------- | ----- |
 | `Observable`             | cold        | unicast   | Producer starts on subscribe; each subscriber gets its own execution. |
-| `ConnectableObservable`  | hot         | multicast | Producer starts on a manual `connect()`; all subscribers share one execution. `share`/`shareReplay` are built on this idea. |
+| `ConnectableObservable`  | hot         | multicast | Producer starts on a manual `connect()`; all subscribers share one execution. The class is deprecated in RxJS 7+ — the idea lives on in `connectable()`, `connect`, and `share`/`shareReplay`. |
 | `Subject`                | hot         | multicast | Simultaneously an Observable **and** an observer — it has `next`/`error`/`complete` *and* is subscribable. |
 
 The `Subject` is the **escape hatch for bridging the imperative and reactive worlds**: call `subject.next(value)` from imperative code (a callback you can't wrap in `fromEvent`, a legacy API), and every subscriber receives the value. Being hot, late subscribers miss earlier values — unless you use the replay-flavored variants: `BehaviorSubject` (initial value, replays the latest), `ReplaySubject` (replays the last *n*), `AsyncSubject` (emits only the final value, on complete). These get their own section: [Subjects](/subjects/).
