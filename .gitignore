@@ -23,3 +23,6 @@ docs/.vitepress/cache
 *.njsproj
 *.sln
 *.sw?
+
+# Raw source material for docs pages (kept local)
+docs/_raw
