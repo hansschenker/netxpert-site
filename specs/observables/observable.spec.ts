@@ -1,6 +1,6 @@
 // Proves the claims made in docs/observables/what-is-an-observable.md
 import { describe, expect, it } from 'vitest'
-import { Observable, of, debounceTime, map, mergeMap, share } from 'rxjs'
+import { Observable, of, debounceTime, map, mergeMap, share, shareReplay } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 
 const scheduler = () =>
@@ -103,6 +103,24 @@ describe('temperature: cold vs hot', () => {
     shared$.subscribe()
 
     expect(executions).toBe(1)
+  })
+
+  it('shareReplay(1) shares one execution and replays the last value to late subscribers', () => {
+    scheduler().run(({ cold, expectObservable, expectSubscriptions }) => {
+      const source$ = cold('a-b-c|')
+      const shared$ = source$.pipe(shareReplay(1))
+
+      // First subscriber sees the full sequence.
+      expectObservable(shared$).toBe('a-b-c|')
+      // A mid-stream subscriber gets the latest value replayed on arrival,
+      // then the live tail.
+      expectObservable(shared$, '---^').toBe('---bc|')
+      // A subscriber arriving after completion still gets the last value.
+      expectObservable(shared$, '------^').toBe('------(c|)')
+
+      // All three shared a single source execution.
+      expectSubscriptions(source$.subscriptions).toBe('^----!')
+    })
   })
 })
 
