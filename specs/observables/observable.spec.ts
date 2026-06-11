@@ -1,10 +1,22 @@
 // Proves the claims made in docs/observables/what-is-an-observable.md
 import { describe, expect, it } from 'vitest'
-import { Observable, of, debounceTime, map, mergeMap, share, shareReplay } from 'rxjs'
+import { Observable, of, range, debounceTime, filter, map, mergeMap, share, shareReplay } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 
 const scheduler = () =>
   new TestScheduler((actual, expected) => expect(actual).toEqual(expected))
+
+describe('the lineage: one query, five notations', () => {
+  it('range(1, 10) filtered to n > 5 is the RxJS spelling of { n | n ∈ {1..10}, n > 5 }', () => {
+    const received: number[] = []
+
+    range(1, 10)
+      .pipe(filter(n => n > 5))
+      .subscribe(n => received.push(n))
+
+    expect(received).toEqual([6, 7, 8, 9, 10])
+  })
+})
 
 describe('an Observable is a behavior, not a container', () => {
   it('is lazy: the producer does not run until subscribe', () => {

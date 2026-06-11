@@ -17,6 +17,58 @@ The intellectual heritage goes back decades before JavaScript had Promises:
 3. **Rx.NET (2009–2012)** — Erik Meijer, a Haskell person before joining Microsoft, asked: *if `IEnumerable<T>` models synchronous pull-based sequences, what is its mathematical dual?* The answer is `IObservable<T>`. Rx.NET applied the entire LINQ operator algebra to asynchronous events.
 4. **RxJS (early 2010s)** is the JavaScript port of that design — Microsoft's original Rx for JavaScript appeared around 2010, and the library was rewritten from the ground up as RxJS 5 in 2015–2016. Angular adopting it as a core dependency drove massive adoption — but the core model is essentially unchanged from Rx.NET in 2009. That stability is the sign of a genuinely good abstraction.
 
+### One query, five notations
+
+The whole lineage becomes visible in a single example. Take one query — *the numbers from 1 to 10, keeping those greater than 5* — and write it at every historical step.
+
+**Set-builder notation** (mathematics, late 19th-century set theory):
+
+```
+{ n | n ∈ {1, …, 10}, n > 5 }
+```
+
+A set is described by a *generator* (`n ∈ {1, …, 10}`) and a *predicate* (`n > 5`) — you say what belongs, not how to compute it.
+
+**Haskell list comprehension** (1990):
+
+```haskell
+[ n | n <- [1..10], n > 5 ]
+```
+
+Almost character-for-character set-builder notation, but now executable — and lazy: the list is only produced as far as someone consumes it.
+
+**LINQ** (C#, 2007):
+
+```csharp
+from n in Enumerable.Range(1, 10)
+where n > 5
+select n
+```
+
+The comprehension generalized to *any* data source — `Range(1, 10)` could just as well be a database table or an XML document. Execution is deferred: nothing runs until you enumerate.
+
+**Rx.NET** (C#, 2009):
+
+```csharp
+Observable.Range(1, 10)
+    .Where(n => n > 5)
+    .Subscribe(Console.WriteLine);
+```
+
+Same operators, flipped arrows: the values are now *pushed* to the subscriber. Nothing runs until you `Subscribe`.
+
+**RxJS** (TypeScript):
+
+```ts
+import { range, filter } from 'rxjs'
+
+range(1, 10).pipe(
+  filter(n => n > 5),
+).subscribe(n => console.log(n)) // 6 7 8 9 10
+```
+
+Five notations spanning more than a century, and the query itself never changed: a generator and a predicate. What changed is the execution model — from a mathematical description, to lazy pull, to deferred queries over any source, to push over time. That is the lineage in one line of code.
+
 ### Duality: flip the arrows
 
 "Categorical dual" sounds intimidating, but the practical meaning is simple: **same structure, opposite direction of data flow**.
