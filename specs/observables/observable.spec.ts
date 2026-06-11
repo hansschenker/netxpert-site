@@ -138,6 +138,58 @@ describe('the time–value model: operators on the t dimension', () => {
   })
 })
 
+describe('Observable vs Promise', () => {
+  it('a Promise is eager, an Observable is lazy', () => {
+    let promiseRuns = 0
+    let observableRuns = 0
+
+    new Promise<number>(resolve => {
+      promiseRuns++
+      resolve(1)
+    })
+    const source$ = new Observable<number>(subscriber => {
+      observableRuns++
+      subscriber.next(1)
+      subscriber.complete()
+    })
+
+    expect(promiseRuns).toBe(1) // ran at construction — nobody even asked
+    expect(observableRuns).toBe(0) // waits for a subscriber
+
+    source$.subscribe()
+    expect(observableRuns).toBe(1)
+  })
+
+  it('a Promise is single-valued: extra resolutions are ignored', async () => {
+    const p = new Promise<number>(resolve => {
+      resolve(1)
+      resolve(2) // ignored — a promise settles exactly once
+    })
+
+    expect(await p).toBe(1)
+  })
+
+  it('a Promise is multicast by default, a plain Observable is unicast', async () => {
+    let promiseRuns = 0
+    const p = new Promise<number>(resolve => {
+      promiseRuns++
+      resolve(1)
+    })
+    expect(await Promise.all([p, p])).toEqual([1, 1]) // two consumers...
+    expect(promiseRuns).toBe(1) // ...one execution
+
+    let observableRuns = 0
+    const cold$ = new Observable<number>(subscriber => {
+      observableRuns++
+      subscriber.next(observableRuns)
+      subscriber.complete()
+    })
+    cold$.subscribe() // two subscribers...
+    cold$.subscribe()
+    expect(observableRuns).toBe(2) // ...two executions
+  })
+})
+
 describe('the monadic algebra', () => {
   it('map fusion: pipe(map(f), map(g)) ≡ pipe(map(g ∘ f))', () => {
     scheduler().run(({ cold, expectObservable }) => {
