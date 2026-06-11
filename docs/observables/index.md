@@ -6,4 +6,4 @@ Topics that belong here: creating observables (`of`, `from`, `fromEvent`, `new O
 
 ## Topics
 
-*No topics yet — this section grows as we explore.*
+- [What Is an Observable?](./what-is-an-observable) — the conceptual foundation: the Haskell → LINQ → Rx.NET lineage, behavior vs. container, the observer contract, cold vs. hot, the iterator/observer pattern fusion, and the monadic algebra.

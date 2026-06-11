@@ -70,4 +70,5 @@ If reading front to back, follow this order:
 
 ## Recently added
 
+- *2026-06-11* — [What Is an Observable?](/observables/what-is-an-observable) — conceptual foundation of the Observable type, with a matching marble spec.
 - *2026-06-10* — Knowledge base scaffolded with the twelve core sections.

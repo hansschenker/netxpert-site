@@ -15,7 +15,13 @@ export default defineConfig({
       {
         text: 'Core Concepts',
         items: [
-          { text: 'Observables', link: '/observables/' },
+          {
+            text: 'Observables',
+            link: '/observables/',
+            items: [
+              { text: 'What Is an Observable?', link: '/observables/what-is-an-observable' },
+            ],
+          },
           { text: 'Operators', link: '/operators/' },
           { text: 'Observers', link: '/observers/' },
           { text: 'Subscriptions', link: '/subscriptions/' },
